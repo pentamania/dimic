@@ -1,0 +1,29 @@
+{
+  "name": "phaster",
+  "version": "1.0.0",
+  "description": "Asset list creation helper CLI",
+  "main": "src/index.js",
+  "bin": {
+    "@pentamania/phaster": "bin/phaster",
+    "phaster": "bin/phaster"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "phina.js",
+    "cli"
+  ],
+  "author": "pentamania",
+  "license": "MIT",
+  "dependencies": {
+    "esm": "^3.2.25",
+    "fs-extra": "^9.1.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^9.0.6"
+  }
+}
