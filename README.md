@@ -30,7 +30,7 @@ export default {
 ```
 
 ## Requirements
-Node.js v10+
+Node.js v10.10.0+
 
 ## Install
 

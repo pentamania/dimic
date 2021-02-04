@@ -5,38 +5,38 @@ const path = require("path");
  * ファイルを再帰的に全取得
  * @see https://stackoverflow.com/a/5827895
  *
- * @param {any} dir
+ * @param {string} dir
  * @param {(err: Error|null, result?: string[])=> any} done
  */
 function walk(dir, done) {
   /** @type {string[]} */
   let results = [];
 
-  fs.readdir(dir, function (err, list) {
+  // fs.Dirent requires node.js v10.10.0 or higher
+  // https://nodejs.org/api/fs.html#fs_class_fs_dirent
+  fs.readdir(dir, { withFileTypes: true }, function (err, list) {
     if (err) return done(err);
     let pending = list.length;
     if (!pending) return done(null, results);
-    list.forEach(function (file) {
-      // file = path.resolve(dir, file);
-      file = path.join(dir, file);
-      fs.stat(file, function (err, stat) {
-        if (stat && stat.isDirectory()) {
-          walk(file, function (err, res) {
-            if (res) results = results.concat(res);
-            if (!--pending) done(null, results);
-          });
-        } else {
-          results.push(file);
+
+    list.forEach((dirent) => {
+      const file = path.join(dir, dirent.name);
+      if (dirent.isDirectory()) {
+        walk(file, (_err, res) => {
+          if (res) results = results.concat(res);
           if (!--pending) done(null, results);
-        }
-      });
+        });
+      } else {
+        results.push(file);
+        if (!--pending) done(null, results);
+      }
     });
   });
 }
 
 /**
  * ファイル全取得（非同期）
- * @param {string} dir 
+ * @param {string} dir
  */
 exports.getFiles = function (dir) {
   return new Promise((resolve, reject) => {
@@ -47,7 +47,6 @@ exports.getFiles = function (dir) {
   });
 };
 
-
 /**
  * 文字列が"fooDir/bar" のようなディレクトリ区切り文字を含んでいるかどうかを簡易的にチェック
  * （OSによる差異吸収）
@@ -57,7 +56,7 @@ exports.getFiles = function (dir) {
  * "fooDir/bar.jpg" => true
  * "bar" => false
  * "bar/" => false
- * 
+ *
  * @param {string} pathStr
  */
 exports.hasDir = function (pathStr) {
