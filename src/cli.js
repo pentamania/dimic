@@ -1,5 +1,5 @@
 import { join, parse, relative, resolve } from "path";
-import { ensureDir, outputFile, writeJSON } from "fs-extra";
+import { existsSync, outputFile, writeJSON } from "fs-extra";
 import parseArg from "./parseArg";
 import { getFiles, hasDir, jsonStringify } from "./utils";
 
@@ -62,7 +62,10 @@ export async function cli(rawArgs) {
 
   const absoluteInputDirPath = resolve(options.inputDir);
 
-  // TODO: ディレクトリが見つからない場合のエラー（兼ensureDir）
+  // ディレクトリが見つからない場合のエラー（兼ensureDir）
+  if (!existsSync(absoluteInputDirPath)) {
+    throw Error(`Input directory "${options.inputDir}" does not exist`);
+  }
 
   /** @type {string[]} */
   let files = await getFiles(absoluteInputDirPath);
@@ -86,7 +89,6 @@ export async function cli(rawArgs) {
       absoluteInputDirPath,
       options.outputFile
     );
-    await ensureDir(absoluteInputDirPath);
 
     switch (options.format) {
       case "esm":
