@@ -2,6 +2,7 @@ const path = require("path");
 const fs = require("fs-extra");
 const getFiles = require("./utils").getFiles;
 const hasDir = require("./utils").hasDir;
+import parseArg from "./parseArg";
 
 /**
  * @typedef {{
@@ -11,13 +12,7 @@ const hasDir = require("./utils").hasDir;
  * }} AssetListJson
  */
 
-// Default params
 const ESM_PREFIX = "asset_mod_";
-const DEFAULT_ASSET_DIR = path.join("src", "assets");
-const DEFAULT_LIST_JS_FILE_NAME = "assetlist.js";
-const DEFAULT_EXPORT_FORMAT = "js"; // json|js
-const DEFAULT_RESOLVE_TYPE = "esm"; // cjs|esm|none
-// const DEFAULT_WATCH_SETTING = true;
 
 /**
  * JSON.stringifyラッパー関数
@@ -71,23 +66,24 @@ function createCodeString(assetList, resolveType = "esm") {
 }
 
 /**
- * @param {{ [x: string]: string; }} args
+ * @param {string[]} rawArgs
  */
-export async function cli(args) {
-  // console.log(args);
-  const assetDir = path.resolve(DEFAULT_ASSET_DIR);
-  const listFileName = DEFAULT_LIST_JS_FILE_NAME;
-  const exportType = args["exportFormat"] || DEFAULT_EXPORT_FORMAT;
-  const moduleResolveType = args["resolveType"] || DEFAULT_RESOLVE_TYPE;
+export async function cli(rawArgs) {
+  const options = parseArg(rawArgs);
+  // console.log('options',options);
+
+  const absoluteInputDirPath = path.resolve(options.inputDir);
+
+  // TODO: ディレクトリが見つからない場合のエラー（兼ensureDir）
 
   /** @type {string[]} */
-  let files = await getFiles(assetDir);
+  let files = await getFiles(absoluteInputDirPath);
 
   // Create AssetListJson
   /** @type {AssetListJson} */
   const assetListData = Object.create(null);
   files.forEach((fp) => {
-    const fileData = path.parse(path.relative(assetDir, fp));
+    const fileData = path.parse(path.relative(absoluteInputDirPath, fp));
     if (fileData.dir && !hasDir(fileData.dir)) {
       const dir = fileData.dir;
       if (!assetListData[dir]) assetListData[dir] = Object.create(null);
@@ -98,26 +94,31 @@ export async function cli(args) {
 
   // Output
   {
-    const assetListExportPath = path.join(assetDir, listFileName);
-    await fs.ensureDir(assetDir);
+    const assetListOutputPath = path.join(
+      absoluteInputDirPath,
+      options.outputFile
+    );
+    await fs.ensureDir(absoluteInputDirPath);
 
-    switch (exportType) {
-      case "js":
-        const codeString = createCodeString(assetListData, moduleResolveType);
-        fs.outputFile(assetListExportPath, codeString, (err) => {
+    switch (options.format) {
+      case "esm":
+        const codeString = createCodeString(assetListData, "esm");
+        fs.outputFile(assetListOutputPath, codeString, (err) => {
           if (err) throw err;
         });
         break;
 
-      case "json":
-        fs.writeJSON(assetListExportPath, assetListData);
+      case "cjs":
+        // TODO
         break;
 
-      // case "ts":
-      //   // TODO?
-      //   break;
+      case "json":
+        fs.writeJSON(assetListOutputPath, assetListData);
+        break;
 
       default:
+        console.error("Format option not valid.");
+        // TODO
         break;
     }
   }
