@@ -1,5 +1,5 @@
-const fs = require("fs");
-const path = require("path");
+import { readdir } from "fs";
+import { join, parse } from "path";
 
 /**
  * ファイルを再帰的に全取得
@@ -14,13 +14,13 @@ function walk(dir, done) {
 
   // fs.Dirent requires node.js v10.10.0 or higher
   // https://nodejs.org/api/fs.html#fs_class_fs_dirent
-  fs.readdir(dir, { withFileTypes: true }, function (err, list) {
+  readdir(dir, { withFileTypes: true }, function (err, list) {
     if (err) return done(err);
     let pending = list.length;
     if (!pending) return done(null, results);
 
     list.forEach((dirent) => {
-      const file = path.join(dir, dirent.name);
+      const file = join(dir, dirent.name);
       if (dirent.isDirectory()) {
         walk(file, (_err, res) => {
           if (res) results = results.concat(res);
@@ -38,14 +38,14 @@ function walk(dir, done) {
  * ファイル全取得（非同期）
  * @param {string} dir
  */
-exports.getFiles = function (dir) {
+export function getFiles(dir) {
   return new Promise((resolve, reject) => {
     walk(dir, (err, results) => {
       if (err) return reject(err);
       resolve(results);
     });
   });
-};
+}
 
 /**
  * 文字列が"fooDir/bar" のようなディレクトリ区切り文字を含んでいるかどうかを簡易的にチェック
@@ -59,6 +59,17 @@ exports.getFiles = function (dir) {
  *
  * @param {string} pathStr
  */
-exports.hasDir = function (pathStr) {
-  return path.parse(pathStr).dir != "";
-};
+export function hasDir(pathStr) {
+  return parse(pathStr).dir != "";
+}
+
+/**
+ * JSON.stringifyラッパー関数
+ * @param {any} obj
+ */
+export function jsonStringify(obj, pretty = true) {
+  if (pretty) {
+    return JSON.stringify(obj, null, 2);
+  }
+  return JSON.stringify(obj);
+}

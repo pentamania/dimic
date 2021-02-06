@@ -1,8 +1,7 @@
-const path = require("path");
-const fs = require("fs-extra");
-const getFiles = require("./utils").getFiles;
-const hasDir = require("./utils").hasDir;
+import { join, parse, relative, resolve } from "path";
+import { ensureDir, outputFile, writeJSON } from "fs-extra";
 import parseArg from "./parseArg";
+import { getFiles, hasDir, jsonStringify } from "./utils";
 
 /**
  * @typedef {{
@@ -13,17 +12,6 @@ import parseArg from "./parseArg";
  */
 
 const ESM_PREFIX = "asset_mod_";
-
-/**
- * JSON.stringifyラッパー関数
- * @param {any} obj
- */
-function stringify(obj, pretty = true) {
-  if (pretty) {
-    return JSON.stringify(obj, null, 2);
-  }
-  return JSON.stringify(obj);
-}
 
 /**
  * コード出力
@@ -50,7 +38,7 @@ function createCodeString(assetList, resolveType = "esm") {
     }
 
     // json文字列化してexport文定義 => module名を囲うコロンを消す
-    let exportStr = `export default ${stringify(fileJson)};`;
+    let exportStr = `export default ${jsonStringify(fileJson)};`;
     moduleNames.forEach((modName) => {
       exportStr = exportStr.replace(`\"${modName}\"`, modName);
     });
@@ -59,7 +47,7 @@ function createCodeString(assetList, resolveType = "esm") {
     // TODO
   } else {
     // そのままexport
-    codeStr += `export default ${stringify(assetList)}`;
+    codeStr += `export default ${jsonStringify(assetList)}`;
   }
 
   return codeStr;
@@ -72,7 +60,7 @@ export async function cli(rawArgs) {
   const options = parseArg(rawArgs);
   // console.log('options',options);
 
-  const absoluteInputDirPath = path.resolve(options.inputDir);
+  const absoluteInputDirPath = resolve(options.inputDir);
 
   // TODO: ディレクトリが見つからない場合のエラー（兼ensureDir）
 
@@ -83,7 +71,7 @@ export async function cli(rawArgs) {
   /** @type {AssetListJson} */
   const assetListData = Object.create(null);
   files.forEach((fp) => {
-    const fileData = path.parse(path.relative(absoluteInputDirPath, fp));
+    const fileData = parse(relative(absoluteInputDirPath, fp));
     if (fileData.dir && !hasDir(fileData.dir)) {
       const dir = fileData.dir;
       if (!assetListData[dir]) assetListData[dir] = Object.create(null);
@@ -94,16 +82,16 @@ export async function cli(rawArgs) {
 
   // Output
   {
-    const assetListOutputPath = path.join(
+    const assetListOutputPath = join(
       absoluteInputDirPath,
       options.outputFile
     );
-    await fs.ensureDir(absoluteInputDirPath);
+    await ensureDir(absoluteInputDirPath);
 
     switch (options.format) {
       case "esm":
         const codeString = createCodeString(assetListData, "esm");
-        fs.outputFile(assetListOutputPath, codeString, (err) => {
+        outputFile(assetListOutputPath, codeString, (err) => {
           if (err) throw err;
         });
         break;
@@ -113,7 +101,7 @@ export async function cli(rawArgs) {
         break;
 
       case "json":
-        fs.writeJSON(assetListOutputPath, assetListData);
+        writeJSON(assetListOutputPath, assetListData);
         break;
 
       default:
