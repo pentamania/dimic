@@ -13,6 +13,7 @@ const DEFAULT_OUTPUT_FILE_NAME = "assetlist.js";
 const DEFAULT_FORMAT = "esm";
 const DEFAULT_WATCH_SETTING = false;
 const DEFAULT_MINIFY_SETTING = false;
+const DEFAULT_MATCH_PATTERN = "!_*";
 
 /**
  * @param {string[]} rawArgs
@@ -24,6 +25,7 @@ export default function (rawArgs) {
       "--output-file": String,
       // "--ext": String,
       "--format": String,
+      "--match": String,
       "--watch": Boolean, // WIP
       "--minify": Boolean, // WIP
 
@@ -39,6 +41,7 @@ export default function (rawArgs) {
     /** @type {FormatType} */
     format: /** @type {FormatType} */ (args["--format"] || DEFAULT_FORMAT),
     // exportExtension: args["--ext"] || DEFAULT_EXTENSION,
+    matchPattern: args["--match"] || DEFAULT_MATCH_PATTERN,
     watch: args["--watch"] || DEFAULT_WATCH_SETTING,
     minify: args["--minify"] || DEFAULT_MINIFY_SETTING,
   };

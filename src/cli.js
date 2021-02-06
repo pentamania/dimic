@@ -1,4 +1,5 @@
 import { join, parse, relative, resolve } from "path";
+import { Minimatch } from "minimatch";
 import { existsSync, outputFile, writeJSON } from "fs-extra";
 import parseArg from "./parseArg";
 import { getFiles, hasDir, jsonStringify } from "./utils";
@@ -73,10 +74,15 @@ export async function cli(rawArgs) {
   // Create AssetListJson
   /** @type {AssetListJson} */
   const assetListData = Object.create(null);
+  const mm = new Minimatch(options.matchPattern);
   files.forEach((fp) => {
     const fileData = parse(relative(absoluteInputDirPath, fp));
     if (fileData.dir && !hasDir(fileData.dir)) {
       const dir = fileData.dir;
+
+      // Skip ignored pattern
+      if (!mm.match(fileData.base)) return;
+
       if (!assetListData[dir]) assetListData[dir] = Object.create(null);
       assetListData[dir][fileData.name] = `./${fileData.dir}/${fileData.base}`;
     }
