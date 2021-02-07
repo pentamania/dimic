@@ -1,6 +1,6 @@
+import { promises as fsp, existsSync } from "fs";
 import { join, parse, relative, resolve } from "path";
 import { Minimatch } from "minimatch";
-import { existsSync, outputFile, writeJSON } from "fs-extra";
 import parseArg from "./parseArg";
 import { getFiles, hasDir, jsonStringify } from "./utils";
 
@@ -96,12 +96,14 @@ export async function cli(rawArgs) {
       options.outputFile
     );
 
+    let codeString = "";
     switch (options.format) {
       case "esm":
-        const codeString = createCodeString(assetListData, "esm");
-        outputFile(assetListOutputPath, codeString, (err) => {
-          if (err) throw err;
-        });
+        codeString = createCodeString(assetListData, "esm");
+        await fsp.writeFile(assetListOutputPath, codeString)
+          .catch((err) => {
+            throw err;
+          });
         break;
 
       case "cjs":
@@ -109,7 +111,11 @@ export async function cli(rawArgs) {
         break;
 
       case "json":
-        writeJSON(assetListOutputPath, assetListData);
+        codeString = jsonStringify(assetListData);
+        await fsp.writeFile(assetListOutputPath, codeString)
+          .catch((err) => {
+            throw err;
+          });
         break;
 
       default:
