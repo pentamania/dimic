@@ -26,9 +26,11 @@ export default function (rawArgs) {
       // "--ext": String,
       "--format": String,
       "--match": String,
+      "--version": Boolean,
       "--watch": Boolean, // WIP
       "--minify": Boolean, // WIP
 
+      "-v": "--version",
       "-w": "--watch", // WIP
     },
     {
@@ -42,6 +44,7 @@ export default function (rawArgs) {
     format: /** @type {FormatType} */ (args["--format"] || DEFAULT_FORMAT),
     // exportExtension: args["--ext"] || DEFAULT_EXTENSION,
     matchPattern: args["--match"] || DEFAULT_MATCH_PATTERN,
+    version: args["--version"] || false,
     watch: args["--watch"] || DEFAULT_WATCH_SETTING,
     minify: args["--minify"] || DEFAULT_MINIFY_SETTING,
   };

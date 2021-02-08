@@ -3,6 +3,7 @@ import { join, parse, relative, resolve } from "path";
 import { Minimatch } from "minimatch";
 import parseArg from "./parseArg";
 import { getFiles, hasDir, jsonStringify } from "./utils";
+import { version } from "../package.json";
 
 /**
  * @typedef {{
@@ -60,6 +61,12 @@ function createCodeString(assetList, resolveType = "esm") {
 export async function cli(rawArgs) {
   const options = parseArg(rawArgs);
   // console.log('options',options);
+
+  // バージョン出力コマンド
+  if (options.version) {
+    console.log(`v${version}`);
+    return;
+  }
 
   const absoluteInputDirPath = resolve(options.inputDir);
 
