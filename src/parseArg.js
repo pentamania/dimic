@@ -27,11 +27,11 @@ export default function (rawArgs) {
       "--format": String,
       "--match": String,
       "--version": Boolean,
-      "--watch": Boolean, // WIP
+      "--watch": Boolean,
       "--minify": Boolean, // WIP
 
       "-v": "--version",
-      "-w": "--watch", // WIP
+      "-w": "--watch",
     },
     {
       argv: rawArgs.slice(2),

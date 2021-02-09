@@ -1,9 +1,11 @@
 import { promises as fsp, existsSync } from "fs";
 import { join, parse, relative, resolve } from "path";
 import { Minimatch } from "minimatch";
+import chokidar from "chokidar";
 import parseArg from "./parseArg";
 import { getFiles, hasDir, jsonStringify } from "./utils";
 import { version } from "../package.json";
+const log = console.log.bind(console);
 
 /**
  * @typedef {{
@@ -75,62 +77,84 @@ export async function cli(rawArgs) {
     throw Error(`Input directory "${options.inputDir}" does not exist`);
   }
 
-  /** @type {string[]} */
-  let files = await getFiles(absoluteInputDirPath);
-
-  // Create AssetListJson
-  /** @type {AssetListJson} */
-  const assetListData = Object.create(null);
   const mm = new Minimatch(options.matchPattern);
-  files.forEach((fp) => {
-    const fileData = parse(relative(absoluteInputDirPath, fp));
-    if (fileData.dir && !hasDir(fileData.dir)) {
-      const dir = fileData.dir;
+  const assetListOutputPath = join(absoluteInputDirPath, options.outputFile);
+  const outputList = async function () {
+    /** @type {string[]} */
+    const allFiles = await getFiles(absoluteInputDirPath);
 
-      // Skip ignored pattern
-      if (!mm.match(fileData.base)) return;
+    // Create AssetListJson
+    /** @type {AssetListJson} */
+    const assetListData = Object.create(null);
+    allFiles.forEach((fp) => {
+      const fileData = parse(relative(absoluteInputDirPath, fp));
+      if (fileData.dir && !hasDir(fileData.dir)) {
+        const dir = fileData.dir;
 
-      if (!assetListData[dir]) assetListData[dir] = Object.create(null);
-      assetListData[dir][fileData.name] = `./${fileData.dir}/${fileData.base}`;
-    }
-  });
-  // console.log("assetListJson", assetListData);
+        // Skip ignored name pattern
+        if (!mm.match(fileData.base)) return;
 
-  // Output
-  {
-    const assetListOutputPath = join(
-      absoluteInputDirPath,
-      options.outputFile
-    );
+        if (!assetListData[dir]) assetListData[dir] = Object.create(null);
 
-    let codeString = "";
-    switch (options.format) {
-      case "esm":
-        codeString = createCodeString(assetListData, "esm");
-        await fsp.writeFile(assetListOutputPath, codeString)
-          .catch((err) => {
+        assetListData[dir][
+          fileData.name
+        ] = `./${fileData.dir}/${fileData.base}`;
+      }
+    });
+    // console.log("assetListJson", assetListData);
+
+    // Write file
+    {
+      let codeString = "";
+      switch (options.format) {
+        case "esm":
+          codeString = createCodeString(assetListData, "esm");
+          await fsp.writeFile(assetListOutputPath, codeString).catch((err) => {
             throw err;
           });
-        break;
+          break;
 
-      case "cjs":
-        // TODO
-        break;
+        case "cjs":
+          // TODO
+          break;
 
-      case "json":
-        codeString = jsonStringify(assetListData);
-        await fsp.writeFile(assetListOutputPath, codeString)
-          .catch((err) => {
+        case "json":
+          codeString = jsonStringify(assetListData);
+          await fsp.writeFile(assetListOutputPath, codeString).catch((err) => {
             throw err;
           });
-        break;
+          break;
 
-      default:
-        console.error("Format option not valid.");
-        // TODO
-        break;
+        default:
+          console.error("Format option not valid.");
+          // TODO
+          break;
+      }
     }
+
+    log(`Output List: ${assetListOutputPath}`);
+  };
+
+  // Watch
+  if (options.watch) {
+    chokidar
+      .watch(absoluteInputDirPath, {
+        ignored: assetListOutputPath,
+        ignoreInitial: true,
+      })
+      // .on("all", (event, path) => {
+      //   console.log(event, path);
+      // })
+      .on("change", (path) => {
+        outputList();
+        log(`Changed: ${path}`);
+      })
+      .on("unlink", (path) => {
+        outputList();
+        log(`Removed: ${path}`);
+      });
+    log(`Watching '${absoluteInputDirPath}'...`);
   }
 
-  console.log("End");
+  await outputList();
 }
