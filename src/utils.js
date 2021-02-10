@@ -37,12 +37,13 @@ function walk(dir, done) {
 /**
  * ファイル全取得（非同期）
  * @param {string} dir
+ * @returns {Promise<string[]>}
  */
 export function getFiles(dir) {
   return new Promise((resolve, reject) => {
     walk(dir, (err, results) => {
       if (err) return reject(err);
-      resolve(results);
+      resolve(results || []);
     });
   });
 }
