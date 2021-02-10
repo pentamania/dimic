@@ -30,6 +30,8 @@ export default function (rawArgs) {
       "--watch": Boolean,
       "--minify": Boolean, // WIP
 
+      "-i": "--input-dir",
+      "-o": "--output-file",
       "-v": "--version",
       "-w": "--watch",
     },
