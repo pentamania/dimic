@@ -27,7 +27,8 @@ export default async function (inputDirPath, mm) {
           const dir = fileData.dir;
 
           // Skip ignored name pattern
-          if (!mm.match(fileData.base)) return listData;
+          if (!mm.match(fileData.base) || !mm.match(fileData.dir))
+            return listData;
 
           // Add new key
           if (!listData[dir]) listData[dir] = Object.create(null);
