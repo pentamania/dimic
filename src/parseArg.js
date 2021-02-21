@@ -7,7 +7,7 @@ import path from "path";
 
 // Default params
 const DEFAULT_INPUT_DIR = path.join("src", "assets");
-const DEFAULT_OUTPUT_FILE_NAME = "assetlist.js";
+const DEFAULT_OUTPUT_FILE_NAME = "index.js";
 // const DEFAULT_EXTENSION = "js"; // json|js
 /** @type {FormatType} */
 const DEFAULT_FORMAT = "esm";
