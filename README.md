@@ -1,5 +1,8 @@
-# [packageName]
-Node CLI to create asset hashmap from directory structure.
+# dimic
+
+Node.js CLI to create pathmap index module from directory structure.
+
+From
 
 ```
 |-src
@@ -11,35 +14,42 @@ Node CLI to create asset hashmap from directory structure.
       |- enemy.png
 ```
 
-👇
+👇 To
 
 ```js
-// src/assets/assetlist.js
-import phaster_mod_0 from "./font/aldrich.woff";
-import phaster_mod_1 from "./image/player.png";
-import phaster_mod_2 from "./image/enemy.png";
+// src/assets/index.js
+import mod_0 from "./font/aldrich.woff";
+import mod_1 from "./image/player.png";
+import mod_2 from "./image/enemy.png";
 export default {
-  "font": {
-    "aldrich": phaster_mod_0
+  font: {
+    aldrich: mod_0,
   },
-  "image": {
-    "player": phaster_mod_1,
-    "enemy": phaster_mod_2
-  }
+  image: {
+    player: mod_1,
+    enemy: mod_2,
+  },
 };
 ```
 
 ## Requirements
+
 Node.js v10.10.0+
 
 ## Install
 
 ```bash
-npm install [packageName]
+npm install dimic -g
 ```
 
 ## Usage
 
+```bash
+dimic --[options]
 ```
-npx [packageName] --options
+
+### Test
+
+```bash
+npm run test
 ```
