@@ -17,7 +17,7 @@ export async function cli(rawArgs) {
 
   // バージョン出力コマンド
   if (options.version) {
-    console.log(`v${version}`);
+    log(`v${version}`);
     return;
   }
 
@@ -46,7 +46,7 @@ export async function cli(rawArgs) {
         throw err;
       });
 
-    log(`Output List: ${outputFilePath}`);
+    log(`Output file: ${outputFilePath}`);
   };
 
   // Watch
