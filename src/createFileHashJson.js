@@ -18,6 +18,9 @@ import { getFiles, hasDir } from "./utils";
 export default async function (inputDirPath, mm) {
   const allFiles = await getFiles(inputDirPath);
 
+  // Sort by file names
+  allFiles.sort();
+
   return (
     allFiles
       // .map((fp) => parse(relative(inputDirPath, fp)))
