@@ -45,8 +45,52 @@ npm install dimic -g
 ## Usage
 
 ```bash
-dimic --[options]
+dimic [--options]
 ```
+
+### Options
+
+#### Change input(target) directory
+
+```bash
+dimic -i public/static
+```
+
+Default input directory is `src/assets/`, but you can change this by `--input-dir` (`-i` in short) option.
+
+
+#### Change output file name
+
+```bash
+dimic -o index.ts
+```
+
+Default output file name is `index.js`, but you can change this by `--output-file` (`-o` in short) option.
+
+
+##### Watch changes
+
+```bash
+dimic --watch
+```
+
+Add this option if you want to output file in accordance with directory change.
+(`-w` in short)
+
+
+#### Filter files
+
+```bash
+dimic --match *
+```
+
+You can filter files/directories to be mapped by adding `--match` option.  
+Use [glob](https://github.com/isaacs/node-glob) pattern to set value.
+
+Default is `!_*`, which means files/dirs starting from "_" are ignored.
+
+
+## Development
 
 ### Test
 
