@@ -1,6 +1,6 @@
 import { jsonStringify } from "./utils";
 
-const ESM_PREFIX = "mod_";
+export const ESM_PREFIX = "mod_";
 
 /**
  * esm形式のコード文に変換
